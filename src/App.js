@@ -1,16 +1,16 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import PageOne from "./components/PageOne";
-import PageTwo from "./components/PageTwo";
+import Patient from "./components/Patient";
+import Appointment from "./components/Appointment";
 
 const App = () => {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/page-one" element={<PageOne />} />
-        <Route path="/page-two" element={<PageTwo />} />
+        <Route path="/patient" element={<Patient />} />
+        <Route path="/appointment" element={<Appointment />} />
       </Routes>
     </Router>
   );

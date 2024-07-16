@@ -1,20 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/system";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 
-const NavbarButton = styled(Button)({
+const NavbarButton = styled(Button)(({ theme, selected }) => ({
   color: "black",
   textTransform: "none",
   borderRadius: "20px",
-  padding: "2px 8px",
+  padding: "4px 20px",
+  backgroundColor: selected ? "#f0f0f0" : "transparent",
+  margin: "0 8px",
   "&:hover": {
     backgroundColor: "#f0f0f0",
   },
-});
+}));
 
 const CustomAppBar = styled(AppBar)({
   backgroundColor: "white",
@@ -31,18 +33,28 @@ const CustomAppBar = styled(AppBar)({
 });
 
 const Navbar = () => {
+  const location = useLocation();
+
   return (
     <CustomAppBar position="static">
       <Toolbar>
-        <NavbarButton component={Link} to="/page-one">
-          Page One
+        <NavbarButton
+          component={Link}
+          to="/patient"
+          selected={location.pathname === "/patient"}
+        >
+          Patient
         </NavbarButton>
-        <NavbarButton component={Link} to="/page-two">
-          Page Two
+        <NavbarButton
+          component={Link}
+          to="/appointment"
+          selected={location.pathname === "/appointment"}
+        >
+          Appointment
         </NavbarButton>
-        <NavbarButton>
+        {/* <NavbarButton>
           <DarkModeIcon />
-        </NavbarButton>
+        </NavbarButton> */}
       </Toolbar>
     </CustomAppBar>
   );
