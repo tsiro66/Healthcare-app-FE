@@ -6,7 +6,6 @@ import IconButton from "@mui/material/IconButton";
 import { styled } from "@mui/system";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoMdLogOut } from "react-icons/io";
-import { MdOutlineDarkMode } from "react-icons/md";
 import { Box } from "@mui/material";
 
 const NavbarButton = styled(Button)(({ theme, selected }) => ({
@@ -104,9 +103,6 @@ export default function Navbar({ onLogout }) {
           </CustomToolbar>
         </CustomAppBar>
         <IconButtonGroup>
-          <RoundButton>
-            <MdOutlineDarkMode />
-          </RoundButton>
           <RoundButton onClick={handleLogout}>
             <IoMdLogOut />
           </RoundButton>

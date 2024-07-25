@@ -1,121 +1,33 @@
 import React, { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import Login from "./components/Login";
-import Patient from "./components/Patient";
-import Appointment from "./components/Appointment";
-import Navbar from "./components/Navbar";
+import { BrowserRouter as Router } from "react-router-dom";
 import { ThemeProvider } from "@emotion/react";
-import { createTheme } from "@mui/material/styles";
-
-const theme = createTheme({
-  typography: {
-    fontFamily: "'Poppins', sans-serif",
-  },
-});
-
-// Custom hook to manage current route
-const useCurrentRoute = (token) => {
-  const [currentRoute, setCurrentRoute] = useState(() => {
-    return (
-      localStorage.getItem("currentRoute") || (token ? "/patient" : "/login")
-    );
-  });
-
-  useEffect(() => {
-    localStorage.setItem("currentRoute", currentRoute);
-  }, [currentRoute]);
-
-  return [currentRoute, setCurrentRoute];
-};
-
-const ProtectedRoute = ({ token, children, setCurrentRoute }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!token) {
-      setCurrentRoute(location.pathname);
-      navigate("/login", { replace: true });
-    }
-  }, [token, location.pathname, navigate, setCurrentRoute]);
-
-  return token ? children : null;
-};
-
-const AppContent = ({ token, onLogin, onLogout }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [currentRoute, setCurrentRoute] = useCurrentRoute(token);
-
-  useEffect(() => {
-    console.log("Current location:", location.pathname);
-    if (token && location.pathname === "/login") {
-      navigate(currentRoute, { replace: true });
-    }
-  }, [location.pathname, token, navigate, currentRoute]);
-
-  return (
-    <>
-      {token && location.pathname !== "/login" && (
-        <Navbar onLogout={onLogout} />
-      )}
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            token ? (
-              <Navigate to={currentRoute} replace />
-            ) : (
-              <Login onLogin={onLogin} />
-            )
-          }
-        />
-        <Route
-          path="/patient"
-          element={
-            <ProtectedRoute token={token} setCurrentRoute={setCurrentRoute}>
-              <Patient />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/appointment"
-          element={
-            <ProtectedRoute token={token} setCurrentRoute={setCurrentRoute}>
-              <Appointment />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="*"
-          element={
-            token ? (
-              <Navigate to={currentRoute} replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-      </Routes>
-    </>
-  );
-};
+import AppContent from "./components/AppContent";
+import { theme } from "./theme";
+import { checkTokenValidity } from "./utils/auth";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 const App = () => {
   const [token, setToken] = useState(null);
+  const [isTokenChecked, setIsTokenChecked] = useState(false);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    if (savedToken) {
-      setToken(savedToken);
-    }
+    const validateToken = async () => {
+      const savedToken = localStorage.getItem("token");
+      if (savedToken) {
+        const isValid = await checkTokenValidity(savedToken);
+        if (isValid) {
+          setToken(savedToken);
+        } else {
+          localStorage.removeItem("token");
+          localStorage.removeItem("currentRoute");
+          setToken(null);
+        }
+      }
+      setIsTokenChecked(true);
+    };
+
+    validateToken();
   }, []);
 
   const handleLogin = (token) => {
@@ -129,6 +41,19 @@ const App = () => {
     localStorage.removeItem("currentRoute");
     setToken(null);
   };
+
+  if (!isTokenChecked) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>

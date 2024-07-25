@@ -5,9 +5,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 
-const CustomTable = ({ rows, columns, onDeleteClick, onEditClick }) => {
+const CustomTable = ({
+  rows,
+  columns,
+  onDeleteClick,
+  onEditClick,
+  idField,
+  tableWidth = "100%",
+  columnWidth = 200,
+}) => {
   const dataRows = rows.map((row) => ({
-    id: row.patientId,
+    id: row[idField],
     ...row,
   }));
 
@@ -15,7 +23,7 @@ const CustomTable = ({ rows, columns, onDeleteClick, onEditClick }) => {
     ...columns.map((column) => ({
       field: column.id,
       headerName: column.label,
-      width: 200,
+      width: columnWidth,
       headerAlign: "center",
       align: "center",
     })),
@@ -31,7 +39,7 @@ const CustomTable = ({ rows, columns, onDeleteClick, onEditClick }) => {
             <EditIcon />
           </IconButton>
           <IconButton
-            onClick={() => onDeleteClick(params.id)}
+            onClick={() => onDeleteClick(params.row[idField])}
             color="error"
             size="small"
           >
@@ -42,7 +50,10 @@ const CustomTable = ({ rows, columns, onDeleteClick, onEditClick }) => {
     },
   ];
 
-  const [pageSize, setPageSize] = useState(5);
+  const [paginationModel, setPaginationModel] = useState({
+    pageSize: 5,
+    page: 0,
+  });
 
   return (
     <Paper style={{ height: 400, width: "100%", margin: "auto" }}>
@@ -50,10 +61,9 @@ const CustomTable = ({ rows, columns, onDeleteClick, onEditClick }) => {
         rows={dataRows}
         columns={dataColumns}
         loading={!dataRows.length}
-        pagination
-        pageSize={pageSize}
-        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-        rowsPerPageOptions={[2, 5, 10]}
+        paginationModel={paginationModel}
+        onPaginationModelChange={setPaginationModel}
+        pageSizeOptions={[2, 5, 10]}
         disableSelectionOnClick
       />
     </Paper>

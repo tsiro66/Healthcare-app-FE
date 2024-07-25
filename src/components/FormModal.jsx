@@ -9,11 +9,14 @@ const FormModal = ({
   initialFormData,
   fields,
   disabledFields,
+  validationRules,
 }) => {
   const [formData, setFormData] = useState(initialFormData);
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     setFormData(initialFormData);
+    setFormErrors({});
   }, [initialFormData]);
 
   const handleChange = (e) => {
@@ -24,8 +27,31 @@ const FormModal = ({
     });
   };
 
+  const validateForm = () => {
+    const errors = {};
+    fields.forEach((field) => {
+      const value = formData[field.name];
+
+      if (validationRules[field.name] && !formData[field.name]) {
+        errors[field.name] = validationRules[field.name];
+      }
+      if (field.name === "dob") {
+        const dobDate = new Date(value);
+        if (dobDate > new Date()) {
+          errors[field.name] = "Date of birth cannot be in the future";
+        }
+      }
+    });
+    return errors;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
     onSubmit(formData);
     onClose();
   };
@@ -40,8 +66,7 @@ const FormModal = ({
           transform: "translate(-50%, -50%)",
           width: 400,
           bgcolor: "background.paper",
-          border: "2px solid #000",
-          borderRadius: "10px",
+          borderRadius: "5px",
           boxShadow: 24,
           p: 4,
         }}
@@ -56,29 +81,33 @@ const FormModal = ({
               name={field.name}
               label={field.label}
               type={field.type || "text"}
-              value={formData[field.name]}
+              value={formData[field.name] || ""}
               onChange={handleChange}
               fullWidth
               margin="normal"
               variant="outlined"
               disabled={disabledFields.includes(field.name)}
               InputLabelProps={field.type === "date" ? { shrink: true } : {}}
+              error={!!formErrors[field.name]} // Show error state
+              helperText={formErrors[field.name]} // Display error message
               sx={{
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
-                    borderColor: "gray", // Change border color of the text field
+                    borderColor: formErrors[field.name] ? "red" : "gray",
                   },
                   "&:hover fieldset": {
-                    borderColor: "darkgray", // Change border color on hover
+                    borderColor: formErrors[field.name]
+                      ? "darkred"
+                      : "darkgray",
                   },
                   "&.Mui-focused fieldset": {
-                    borderColor: "black", // Change border color when focused
+                    borderColor: formErrors[field.name] ? "darkred" : "black",
                   },
                 },
                 "& .MuiInputLabel-root": {
-                  color: "gray", // Default label color
+                  color: formErrors[field.name] ? "red" : "gray",
                   "&.Mui-focused": {
-                    color: "black", // Label color when focused
+                    color: formErrors[field.name] ? "darkred" : "black",
                   },
                 },
               }}
