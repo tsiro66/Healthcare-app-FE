@@ -6,32 +6,39 @@ import { theme } from "./theme";
 import { checkTokenValidity } from "./utils/auth";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import ErrorPage from "./components/ErrorPage/ErrorPage";
 
 const App = () => {
   const [token, setToken] = useState(null);
   const [isTokenChecked, setIsTokenChecked] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const validateToken = async () => {
-      const savedToken = localStorage.getItem("token");
-      if (savedToken) {
-        const isValid = await checkTokenValidity(savedToken);
-        if (isValid) {
-          setToken(savedToken);
-        } else {
-          localStorage.removeItem("token");
-          localStorage.removeItem("currentRoute");
-          setToken(null);
+      try {
+        const savedToken = localStorage.getItem("token");
+        if (savedToken) {
+          const isValid = await checkTokenValidity(savedToken);
+          if (isValid) {
+            setToken(savedToken);
+          } else {
+            localStorage.removeItem("token");
+            localStorage.removeItem("currentRoute");
+            setToken(null);
+          }
         }
+      } catch (error) {
+        console.error("Network error", error);
+        setHasError(true);
+      } finally {
+        setIsTokenChecked(true);
       }
-      setIsTokenChecked(true);
     };
 
     validateToken();
   }, []);
 
   const handleLogin = (token) => {
-    console.log("Token received in App:", token);
     localStorage.setItem("token", token);
     setToken(token);
   };
@@ -55,11 +62,16 @@ const App = () => {
     );
   }
 
+  if (hasError) {
+    return <ErrorPage />;
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Router>
         <AppContent
           token={token}
+          setToken={setToken}
           onLogin={handleLogin}
           onLogout={handleLogout}
         />

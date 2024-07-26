@@ -13,7 +13,7 @@ import Navbar from "./Navbar";
 import ProtectedRoute from "./ProtectedRoute";
 import useCurrentRoute from "./routes/useCurrentRoute";
 
-const AppContent = ({ token, onLogin, onLogout }) => {
+const AppContent = ({ token, onLogin, onLogout, setToken }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [currentRoute, setCurrentRoute] = useCurrentRoute(token);
@@ -55,7 +55,11 @@ const AppContent = ({ token, onLogin, onLogout }) => {
         <Route
           path="/patient"
           element={
-            <ProtectedRoute token={token} setCurrentRoute={setCurrentRoute}>
+            <ProtectedRoute
+              token={token}
+              setToken={setToken}
+              setCurrentRoute={setCurrentRoute}
+            >
               <Patient />
             </ProtectedRoute>
           }
@@ -63,7 +67,11 @@ const AppContent = ({ token, onLogin, onLogout }) => {
         <Route
           path="/appointment"
           element={
-            <ProtectedRoute token={token} setCurrentRoute={setCurrentRoute}>
+            <ProtectedRoute
+              token={token}
+              setToken={setToken}
+              setCurrentRoute={setCurrentRoute}
+            >
               <Appointment />
             </ProtectedRoute>
           }

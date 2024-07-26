@@ -3,48 +3,46 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { checkTokenValidity } from "../utils/auth";
 import { CircularProgress, Box } from "@mui/material";
 
-const ProtectedRoute = ({ token, children, setCurrentRoute }) => {
+const ProtectedRoute = ({ token, setToken, children, setCurrentRoute }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isValidating, setIsValidating] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-    const checkToken = async () => {
+    const validateToken = async () => {
       if (!token) {
+        console.log("No token found. Redirecting to login.");
         setCurrentRoute(location.pathname);
         navigate("/login", { replace: true });
         return;
       }
 
       try {
-        setIsValidating(true);
         const isValid = await checkTokenValidity(token);
-        if (isMounted) {
-          if (!isValid) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("currentRoute");
-            setCurrentRoute(location.pathname);
-            navigate("/login", { replace: true });
-          }
-          setIsValidating(false);
+        if (!isValid) {
+          console.log("Token invalid. Clearing token and redirecting.");
+          localStorage.removeItem("token");
+          localStorage.removeItem("currentRoute");
+          setToken(null); // Clear token in state
+          setCurrentRoute(location.pathname);
+          navigate("/login", { replace: true });
+        } else {
+          setIsAuthenticated(true); // Token is valid
         }
       } catch (error) {
-        if (isMounted) {
-          console.error("Error validating token:", error);
-          setIsValidating(false);
-          // Optionally handle network errors differently
-          // e.g., show a network error message instead of redirecting
-        }
+        console.error("Error validating token:", error);
+        // Handle the error by redirecting to login if necessary
+        setToken(null); // Clear token on error
+        setCurrentRoute(location.pathname);
+        navigate("/login", { replace: true });
+      } finally {
+        setIsValidating(false); // Always stop validation after check
       }
     };
 
-    checkToken();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [token, location.pathname, navigate, setCurrentRoute]);
+    validateToken();
+  }, [token, location.pathname, navigate, setCurrentRoute, setToken]);
 
   if (isValidating) {
     return (
@@ -59,7 +57,11 @@ const ProtectedRoute = ({ token, children, setCurrentRoute }) => {
     );
   }
 
-  return token ? children : null;
+  if (!isAuthenticated) {
+    return null; // Token is invalid or not authenticated
+  }
+
+  return children; // Token is valid, render children
 };
 
 export default ProtectedRoute;

@@ -3,10 +3,10 @@ import CustomTable from "../CustomTable";
 
 const PatientTable = ({ rows, onDeleteClick, onEditClick }) => {
   const columns = [
-    { id: "patientId", label: "Patient ID" },
+    { id: "patientId", label: "ID" },
     { id: "firstName", label: "First Name" },
     { id: "lastName", label: "Last Name" },
-    { id: "dob", label: "Date of Birth" },
+    { id: "dob", label: "Date of Birth", hideOnMobile: true },
     { id: "gender", label: "Gender" },
   ];
 

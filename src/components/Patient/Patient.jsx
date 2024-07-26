@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import { Container, Typography } from "@mui/material";
 import ErrorSnackbar from "../ErrorSnackbar";
@@ -28,6 +28,7 @@ const Patient = () => {
   const [patientToDelete, setPatientToDelete] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [lastErrorTime, setLastErrorTime] = useState(0);
+  const isMounted = useRef(true);
 
   const setErrorWithDebounce = useCallback(
     (message) => {
@@ -62,7 +63,9 @@ const Patient = () => {
           withCredentials: true,
         },
       });
-      setRows(response.data);
+      if (isMounted.current) {
+        setRows(response.data);
+      }
       return response.data;
     } catch (error) {
       if (error.message === "Network Error") {
@@ -79,24 +82,12 @@ const Patient = () => {
   }, [isLoading, setErrorWithDebounce]);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchDataWrapper = async () => {
-      try {
-        const data = await fetchData();
-        if (isMounted) {
-          setRows(data);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setErrorWithDebounce("Error fetching data");
-        }
-      }
-    };
-    fetchDataWrapper();
+    isMounted.current = true;
+    fetchData();
     return () => {
-      isMounted = false;
+      isMounted.current = false;
     };
-  }, [fetchData, setErrorWithDebounce]);
+  }, []); // Empty dependency array
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -241,6 +232,9 @@ const Patient = () => {
           fontFamily: "'Poppins', sans-serif",
           marginBottom: "30px",
           fontWeight: "medium",
+          "@media (max-width: 600px)": {
+            fontSize: "25px",
+          },
         }}
       >
         My Patients
