@@ -148,7 +148,7 @@ const FormModal = ({
                   </Select>
                 </FormControl>
               );
-            } else if (field.name !== "patientId") {
+            } else {
               return (
                 <TextField
                   key={field.name}

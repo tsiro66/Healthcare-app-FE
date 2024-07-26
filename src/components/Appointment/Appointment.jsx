@@ -187,7 +187,7 @@ const Appointment = () => {
         return;
       }
 
-      const url = `http://localhost:8080/appointment?patientId=${newAppointment.patientId}`;
+      const url = `http://localhost:8080/appointment/${newAppointment.patientId}`;
       const token = localStorage.getItem("token");
       await axios.post(url, newAppointment, {
         headers: {
