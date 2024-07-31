@@ -9,6 +9,31 @@ import {
 } from "@mui/material";
 
 const DeleteConfirmationModal = ({ open, onClose, onConfirm, itemName }) => {
+  // Styles for the dialog actions
+  const dialogActionsStyles = {
+    display: "flex",
+    justifyContent: "center",
+    padding: "16px",
+  };
+
+  // Styles for the delete button
+  const deleteButtonStyles = {
+    marginRight: 4,
+    "&:hover": {
+      backgroundColor: "rgba(255, 55, 55, 1)",
+    },
+  };
+
+  // Styles for the cancel button
+  const cancelButtonStyles = {
+    backgroundColor: "black",
+    color: "white",
+    marginLeft: 4,
+    "&:hover": {
+      backgroundColor: "rgba(9, 9, 9, 0.8)",
+    },
+  };
+
   return (
     <Dialog
       open={open}
@@ -20,48 +45,24 @@ const DeleteConfirmationModal = ({ open, onClose, onConfirm, itemName }) => {
         Confirm Deletion
       </DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">
+        <DialogContentText id="alert-dialog-description" align="center">
           Are you sure you want to delete this {itemName}? This action cannot be
           undone.
           {itemName === "patient" &&
             " All associated appointments will also be deleted."}
         </DialogContentText>
       </DialogContent>
-      <DialogActions
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          padding: "16px",
-        }}
-      >
+      <DialogActions sx={dialogActionsStyles}>
         <Button
           onClick={onConfirm}
           variant="contained"
-          type="submit"
           color="error"
-          sx={{
-            marginRight: 4,
-            "&:hover": {
-              backgroundColor: "rgba(255, 55, 55, 1)",
-            },
-          }}
+          sx={deleteButtonStyles}
           autoFocus
         >
           Delete
         </Button>
-        <Button
-          onClick={onClose}
-          variant="contained"
-          type="submit"
-          sx={{
-            backgroundColor: "black",
-            color: "white",
-            marginLeft: 4,
-            "&:hover": {
-              backgroundColor: "rgba(9, 9, 9, 0.8)",
-            },
-          }}
-        >
+        <Button onClick={onClose} variant="contained" sx={cancelButtonStyles}>
           Cancel
         </Button>
       </DialogActions>

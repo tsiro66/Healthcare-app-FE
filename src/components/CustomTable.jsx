@@ -1,37 +1,35 @@
 import React, { useState } from "react";
 import { styled } from "@mui/material/styles";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { tableCellClasses } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import TablePagination from "@mui/material/TablePagination";
-import Paper from "@mui/material/Paper";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Paper,
+  IconButton,
+} from "@mui/material";
+import { tableCellClasses } from "@mui/material/TableCell";
 import DeleteIcon from "@mui/icons-material/Delete";
-import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 
+// Styles for table
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
-    "@media (max-width: 600px)": {
-      fontSize: "10px",
-    },
+    "@media (max-width: 600px)": { fontSize: "10px" },
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
-    "@media (max-width: 600px)": {
-      fontSize: "10px",
-    },
+    "@media (max-width: 600px)": { fontSize: "10px" },
   },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
-  },
+  "&:nth-of-type(odd)": { backgroundColor: theme.palette.action.hover },
 }));
 
 const CustomTable = ({
@@ -44,6 +42,7 @@ const CustomTable = ({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  // For pagination
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -53,25 +52,28 @@ const CustomTable = ({
     setPage(0);
   };
 
-  // Avoid a layout jump when reaching the last page with empty rows.
+  // Calculate empty rows for consistent table height
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
+  // Styles for responsive cell display
+  const cellStyles = (hideOnMobile) => ({
+    "@media (max-width: 600px)": {
+      display: hideOnMobile ? "none" : "table-cell",
+    },
+  });
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden" }}>
       <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label="customized table">
+        <Table stickyHeader aria-label="custom table">
           <TableHead>
             <TableRow>
               {columns.map((column) => (
                 <StyledTableCell
                   key={column.id}
-                  align={"center"}
-                  sx={{
-                    "@media (max-width: 600px)": {
-                      display: column.hideOnMobile ? "none" : "table-cell",
-                    },
-                  }}
+                  align="center"
+                  sx={cellStyles(column.hideOnMobile)}
                 >
                   {column.label}
                 </StyledTableCell>
@@ -87,14 +89,10 @@ const CustomTable = ({
                   {columns.map((column) => (
                     <StyledTableCell
                       key={column.id}
-                      align={"center"}
+                      align="center"
                       component={column.id === idField ? "th" : "td"}
                       scope={column.id === idField ? "row" : undefined}
-                      sx={{
-                        "@media (max-width: 600px)": {
-                          display: column.hideOnMobile ? "none" : "table-cell",
-                        },
-                      }}
+                      sx={cellStyles(column.hideOnMobile)}
                     >
                       {row[column.id]}
                     </StyledTableCell>

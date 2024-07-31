@@ -27,11 +27,13 @@ const FormModal = ({
   const [formErrors, setFormErrors] = useState({});
   const [patients, setPatients] = useState([]);
 
+  // Reset form data and errors when initial data changes
   useEffect(() => {
     setFormData(initialFormData);
     setFormErrors({});
   }, [initialFormData]);
 
+  // Fetch patients when patient dropdown is needed
   useEffect(() => {
     if (showPatientDropdown) {
       const fetchPatients = async () => {
@@ -52,6 +54,7 @@ const FormModal = ({
     }
   }, [showPatientDropdown]);
 
+  // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -60,14 +63,18 @@ const FormModal = ({
     });
   };
 
+  // Validate form fields
   const validateForm = () => {
     const errors = {};
     fields.forEach((field) => {
       const value = formData[field.name];
 
+      // Check if form field is empty
       if (validationRules[field.name] && !formData[field.name]) {
         errors[field.name] = validationRules[field.name];
       }
+
+      // Check if the date is from the future
       if (field.name === "dob") {
         const dobDate = new Date(value);
         if (dobDate > new Date()) {
@@ -75,9 +82,12 @@ const FormModal = ({
         }
       }
     });
+
+    // Return any errors
     return errors;
   };
 
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     const errors = validateForm();
@@ -87,6 +97,71 @@ const FormModal = ({
     }
     onSubmit(formData);
     onClose();
+  };
+
+  // Styles for form fields
+  const fieldStyles = {
+    "@media (max-width: 600px)": { fontSize: "0.875rem" },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": { borderColor: "gray" },
+      "&:hover fieldset": { borderColor: "darkgray" },
+      "&.Mui-focused fieldset": { borderColor: "black" },
+    },
+    "& .MuiInputLabel-root": {
+      color: "gray",
+      "&.Mui-focused": { color: "black" },
+    },
+  };
+
+  // Render form fields
+  const renderField = (field) => {
+    // If the field name is patientId and showPatientDropdown is true make patient id field a dropdown list of patients
+    if (field.name === "patientId" && showPatientDropdown) {
+      return (
+        <FormControl
+          fullWidth
+          margin="normal"
+          key={field.name}
+          sx={fieldStyles}
+        >
+          <InputLabel id="patient-select-label">{field.label}</InputLabel>
+          <Select
+            labelId="patient-select-label"
+            id="patient-select"
+            name={field.name}
+            value={formData[field.name] || ""}
+            onChange={handleChange}
+            label={field.label}
+            disabled={disabledFields.includes(field.name)}
+          >
+            {patients.map((patient) => (
+              <MenuItem key={patient.patientId} value={patient.patientId}>
+                {`${patient.firstName} ${patient.lastName} (${patient.patientId})`}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      );
+    }
+
+    return (
+      <TextField
+        key={field.name}
+        name={field.name}
+        label={field.label}
+        type={field.type || "text"}
+        value={formData[field.name] || ""}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        variant="outlined"
+        disabled={disabledFields.includes(field.name)}
+        InputLabelProps={field.type === "date" ? { shrink: true } : {}}
+        error={!!formErrors[field.name]}
+        helperText={formErrors[field.name]}
+        sx={fieldStyles}
+      />
+    );
   };
 
   return (
@@ -102,100 +177,19 @@ const FormModal = ({
           borderRadius: "5px",
           boxShadow: 24,
           p: 4,
-          "@media (max-width: 600px)": {
-            width: "80%",
-            p: 2,
-          },
+          "@media (max-width: 600px)": { width: "80%", p: 2 },
         }}
       >
         <Typography
           variant="h6"
           component="h2"
           align="center"
-          sx={{
-            "@media (max-width: 600px)": {
-              fontSize: "1rem",
-            },
-          }}
+          sx={{ "@media (max-width: 600px)": { fontSize: "1rem" } }}
         >
           {title}
         </Typography>
         <form onSubmit={handleSubmit}>
-          {fields.map((field) => {
-            if (field.name === "patientId" && showPatientDropdown) {
-              return (
-                <FormControl fullWidth margin="normal" key={field.name}>
-                  <InputLabel id="patient-select-label">
-                    {field.label}
-                  </InputLabel>
-                  <Select
-                    labelId="patient-select-label"
-                    id="patient-select"
-                    name={field.name}
-                    value={formData[field.name] || ""}
-                    onChange={handleChange}
-                    label={field.label}
-                    disabled={disabledFields.includes(field.name)}
-                  >
-                    {patients.map((patient) => (
-                      <MenuItem
-                        key={patient.patientId}
-                        value={patient.patientId}
-                      >
-                        {`${patient.firstName} ${patient.lastName} (${patient.patientId})`}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              );
-            } else {
-              return (
-                <TextField
-                  key={field.name}
-                  name={field.name}
-                  label={field.label}
-                  type={field.type || "text"}
-                  value={formData[field.name] || ""}
-                  onChange={handleChange}
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                  disabled={disabledFields.includes(field.name)}
-                  InputLabelProps={
-                    field.type === "date" ? { shrink: true } : {}
-                  }
-                  error={!!formErrors[field.name]}
-                  helperText={formErrors[field.name]}
-                  sx={{
-                    "@media (max-width: 600px)": {
-                      fontSize: "0.875rem",
-                    },
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: formErrors[field.name] ? "red" : "gray",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: formErrors[field.name]
-                          ? "darkred"
-                          : "darkgray",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: formErrors[field.name]
-                          ? "darkred"
-                          : "black",
-                      },
-                    },
-                    "& .MuiInputLabel-root": {
-                      color: formErrors[field.name] ? "red" : "gray",
-                      "&.Mui-focused": {
-                        color: formErrors[field.name] ? "darkred" : "black",
-                      },
-                    },
-                  }}
-                />
-              );
-            }
-          })}
+          {fields.map(renderField)}
           <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
             <Button
               variant="contained"
@@ -203,12 +197,8 @@ const FormModal = ({
               sx={{
                 backgroundColor: "black",
                 color: "white",
-                "&:hover": {
-                  backgroundColor: "rgba(9, 9, 9, 0.8)",
-                },
-                "@media (max-width: 600px)": {
-                  fontSize: "0.75rem",
-                },
+                "&:hover": { backgroundColor: "rgba(9, 9, 9, 0.8)" },
+                "@media (max-width: 600px)": { fontSize: "0.75rem" },
               }}
             >
               Submit
@@ -220,12 +210,8 @@ const FormModal = ({
                 borderColor: "gray",
                 backgroundColor: "white",
                 color: "black",
-                "&:hover": {
-                  borderColor: "black",
-                },
-                "@media (max-width: 600px)": {
-                  fontSize: "0.75rem",
-                },
+                "&:hover": { borderColor: "black" },
+                "@media (max-width: 600px)": { fontSize: "0.75rem" },
               }}
             >
               Cancel
@@ -236,5 +222,4 @@ const FormModal = ({
     </Modal>
   );
 };
-
 export default FormModal;

@@ -8,6 +8,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoMdLogOut } from "react-icons/io";
 import { Box } from "@mui/material";
 
+// Custom styled components
 const NavbarButton = styled(Button)(({ theme, selected }) => ({
   color: "black",
   textTransform: "none",

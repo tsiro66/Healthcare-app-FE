@@ -9,6 +9,7 @@ import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
 
 const theme = createTheme();
 
+// Styled components for styling
 const FormContainer = styled("div")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -32,15 +33,41 @@ const CenteredContainer = styled(Container)(({ theme }) => ({
   minHeight: "80vh",
 }));
 
+// Styles for text fields
+const textFieldStyles = {
+  margin: theme.spacing(1, 0),
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: "gray",
+    },
+    "&:hover fieldset": {
+      borderColor: "darkgray",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "black",
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: "gray",
+    "&.Mui-focused": {
+      color: "black",
+    },
+  },
+};
+
 const Login = ({ onLogin }) => {
+  // State for usernname and password inputs
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // State for errors
   const [error, setError] = useState("");
+  // Hook for navigate
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  // Function to handle login
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
+    // Post request to url with credetials typed
     const tokenUrl = "http://localhost:8080/token";
     const credentials = btoa(`${username}:${password}`);
 
@@ -58,9 +85,9 @@ const Login = ({ onLogin }) => {
       const token = response.data.token;
 
       if (token) {
-        localStorage.setItem("token", token); // Store token in localStorage
+        localStorage.setItem("token", token);
         onLogin(token);
-        navigate("/patient"); // Redirect to Patient component
+        navigate("/patient");
       } else {
         setError("Login failed. No token received.");
       }
@@ -84,34 +111,16 @@ const Login = ({ onLogin }) => {
           Use your credentials to login.
         </Typography>
         <FormContainer>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSubmit}>
+            {/* Pass the username and password from the inputs to username and password */}
             <TextField
               label="Username"
               fullWidth
               size="small"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              variant="outlined" // Ensure the text field uses the outlined variant
-              sx={{
-                margin: theme.spacing(1, 0),
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "gray", // Change border color of the text field
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "darkgray", // Change border color on hover
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "black", // Change border color when focused
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: "gray", // Default label color
-                  "&.Mui-focused": {
-                    color: "black", // Label color when focused
-                  },
-                },
-              }}
+              variant="outlined"
+              sx={textFieldStyles}
             />
             <TextField
               label="Password"
@@ -120,27 +129,8 @@ const Login = ({ onLogin }) => {
               size="small"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              variant="outlined" // Ensure the text field uses the outlined variant
-              sx={{
-                margin: theme.spacing(1, 0),
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "gray", // Change border color of the text field
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "darkgray", // Change border color on hover
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "black", // Change border color when focused
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: "gray", // Default label color
-                  "&.Mui-focused": {
-                    color: "black", // Label color when focused
-                  },
-                },
-              }}
+              variant="outlined"
+              sx={textFieldStyles}
             />
             {error && <Typography color="error">{error}</Typography>}
             <LoginButton type="submit" fullWidth variant="contained">

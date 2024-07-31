@@ -7,6 +7,7 @@ import ErrorSnackbar from "../ErrorSnackbar";
 import FormModal from "../FormModal";
 import DeleteConfirmationModal from "../DeleteConfirmationModal";
 
+// Generate form validation rules based on required fields
 const getValidationRules = (fields) => {
   const rules = {};
   fields.forEach((field) => {
@@ -18,18 +19,19 @@ const getValidationRules = (fields) => {
 };
 
 const Appointment = () => {
-  const [rows, setRows] = useState([]);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [appointmentToDelete, setAppointmentToDelete] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastErrorTime, setLastErrorTime] = useState(0);
-  const isMounted = useRef(true);
+  const [rows, setRows] = useState([]); // Data rows for the patient table
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // Snackbar open state
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // Snackbar severity (color)
+  const [modalOpen, setModalOpen] = useState(false); // Modal open state
+  const [editingAppointment, setEditingAppointment] = useState(null); // Appointment being edited
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false); // Delete confirmation modal state
+  const [appointmentToDelete, setAppointmentToDelete] = useState(null); // Id of patient to delete
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [lastErrorTime, setLastErrorTime] = useState(0); // Timestamp of last error
+  const isMounted = useRef(true); // Ref to track component mount status
 
+  // Prevent multiple error messages in quick succession
   const setErrorWithDebounce = useCallback(
     (message) => {
       const now = Date.now();
@@ -43,6 +45,7 @@ const Appointment = () => {
     [lastErrorTime]
   );
 
+  // Display success message and auto-close after 3 seconds
   const handleSuccessMessage = (message) => {
     setSnackbarMessage(message);
     setSnackbarSeverity("success");
@@ -52,8 +55,9 @@ const Appointment = () => {
     }, 3000);
   };
 
+  // Fetch appointment data from the server
   const fetchData = useCallback(async () => {
-    if (isLoading) return [];
+    if (isLoading) return []; // Prevent duplicate requests if already loading
     setIsLoading(true);
     const token = localStorage.getItem("token");
     try {
@@ -81,18 +85,21 @@ const Appointment = () => {
     }
   }, [isLoading, setErrorWithDebounce]);
 
+  // Load appointments when component mounts
   useEffect(() => {
     isMounted.current = true;
     fetchData();
     return () => {
       isMounted.current = false;
     };
-  }, []); // Empty dependency array
+  }, []);
 
+  // Snackbar close handler
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
 
+  // Modal handlers
   const handleModalOpen = () => {
     setModalOpen(true);
   };
@@ -102,71 +109,7 @@ const Appointment = () => {
     setEditingAppointment(null);
   };
 
-  const handleDeleteClick = (appointmentId) => {
-    setAppointmentToDelete(appointmentId);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (appointmentToDelete) {
-      try {
-        const token = localStorage.getItem("token");
-        await axios.delete(
-          `http://localhost:8080/appointment/${appointmentToDelete}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              withCredentials: true,
-            },
-          }
-        );
-        await fetchData();
-        handleSuccessMessage("Appointment deleted successfully");
-      } catch (error) {
-        console.error("Error deleting appointment", error);
-        setErrorWithDebounce("Error deleting appointment");
-      }
-    }
-    setDeleteModalOpen(false);
-    setAppointmentToDelete(null);
-  };
-
-  const handleDeleteCancel = () => {
-    setDeleteModalOpen(false);
-    setAppointmentToDelete(null);
-  };
-
-  const handleEditAppointment = (appointment) => {
-    setEditingAppointment({
-      ...appointment,
-      originalId: appointment.appointmentId,
-    });
-    setModalOpen(true);
-  };
-
-  const handleUpdateAppointment = async (updatedAppointment) => {
-    try {
-      const token = localStorage.getItem("token");
-      const originalId = editingAppointment.originalId;
-      await axios.put(
-        `http://localhost:8080/appointment/${originalId}`,
-        updatedAppointment,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            withCredentials: true,
-          },
-        }
-      );
-      await fetchData();
-      setEditingAppointment(null);
-      handleSuccessMessage("Appointment updated successfully");
-    } catch (error) {
-      console.error("Error updating appointment", error);
-      setErrorWithDebounce("Error updating appointment");
-    }
-  };
-
+  // Create Handler
   const handleCreateAppointment = async (newAppointment) => {
     try {
       const currentAppointments = await fetchData();
@@ -203,6 +146,74 @@ const Appointment = () => {
     }
   };
 
+  // Update handlers
+  const handleEditAppointment = (appointment) => {
+    setEditingAppointment({
+      ...appointment,
+      originalId: appointment.appointmentId,
+    });
+    setModalOpen(true);
+  };
+
+  const handleUpdateAppointment = async (updatedAppointment) => {
+    try {
+      const token = localStorage.getItem("token");
+      const originalId = editingAppointment.originalId;
+      await axios.put(
+        `http://localhost:8080/appointment/${originalId}`,
+        updatedAppointment,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            withCredentials: true,
+          },
+        }
+      );
+      await fetchData();
+      setEditingAppointment(null);
+      handleSuccessMessage("Appointment updated successfully");
+    } catch (error) {
+      console.error("Error updating appointment", error);
+      setErrorWithDebounce("Error updating appointment");
+    }
+  };
+
+  // Delete handlers
+  const handleDeleteClick = (appointmentId) => {
+    setAppointmentToDelete(appointmentId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (appointmentToDelete) {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(
+          `http://localhost:8080/appointment/${appointmentToDelete}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              withCredentials: true,
+            },
+          }
+        );
+        await fetchData();
+        handleSuccessMessage("Appointment deleted successfully");
+      } catch (error) {
+        console.error("Error deleting appointment", error);
+        setErrorWithDebounce("Error deleting appointment");
+      }
+    }
+    setDeleteModalOpen(false);
+    setAppointmentToDelete(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setAppointmentToDelete(null);
+  };
+
+  // Initial form data and fields for form modal
   const initialFormData = {
     appointmentId: "",
     patientId: "",

@@ -11,17 +11,22 @@ import Patient from "./Patient/Patient";
 import Appointment from "./Appointment/Appointment";
 import Navbar from "./Navbar";
 import ProtectedRoute from "./ProtectedRoute";
-import useCurrentRoute from "./routes/useCurrentRoute";
+import useCurrentRoute from "./useCurrentRoute";
 
 const AppContent = ({ token, onLogin, onLogout, setToken }) => {
+  // Hook to get the current location
   const location = useLocation();
+  // Hook to navigate
   const navigate = useNavigate();
+  // Custom hook to manage the current route
   const [currentRoute, setCurrentRoute] = useCurrentRoute(token);
 
   useEffect(() => {
     if (!token) {
+      // If not authenticated, redirect to login
       navigate("/login", { replace: true });
     } else if (location.pathname === "/login") {
+      // If authenticated and on login page, redirect to current route
       navigate(currentRoute, { replace: true });
     }
   }, [location.pathname, token, navigate, currentRoute]);

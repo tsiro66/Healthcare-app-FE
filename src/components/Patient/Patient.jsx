@@ -7,6 +7,7 @@ import DeleteConfirmationModal from "../DeleteConfirmationModal";
 import PatientTable from "./PatientTable";
 import PatientButton from "./PatientButton";
 
+// Generate form validation rules based on required fields
 const getValidationRules = (fields) => {
   const rules = {};
   fields.forEach((field) => {
@@ -18,18 +19,19 @@ const getValidationRules = (fields) => {
 };
 
 const Patient = () => {
-  const [rows, setRows] = useState([]);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingPatient, setEditingPatient] = useState(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [patientToDelete, setPatientToDelete] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastErrorTime, setLastErrorTime] = useState(0);
-  const isMounted = useRef(true);
+  const [rows, setRows] = useState([]); // Data rows for the patient table
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // Snackbar open state
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // Snackbar severity (color)
+  const [modalOpen, setModalOpen] = useState(false); // Modal open state
+  const [editingPatient, setEditingPatient] = useState(null); // Patient being edited
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false); // Delete confirmation modal state
+  const [patientToDelete, setPatientToDelete] = useState(null); // Id of patient to delete
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [lastErrorTime, setLastErrorTime] = useState(0); // Timestamp of last error
+  const isMounted = useRef(true); // Ref to track component mount status
 
+  // Prevent multiple errors
   const setErrorWithDebounce = useCallback(
     (message) => {
       const now = Date.now();
@@ -43,6 +45,7 @@ const Patient = () => {
     [lastErrorTime]
   );
 
+  // Display success message and auto-close after 3 seconds
   const handleSuccessMessage = (message) => {
     setSnackbarMessage(message);
     setSnackbarSeverity("success");
@@ -52,8 +55,9 @@ const Patient = () => {
     }, 3000);
   };
 
+  // Fetch patient data from the server
   const fetchData = useCallback(async () => {
-    if (isLoading) return [];
+    if (isLoading) return []; // Prevent duplicate requests if already loading
     setIsLoading(true);
     const token = localStorage.getItem("token");
     try {
@@ -81,18 +85,21 @@ const Patient = () => {
     }
   }, [isLoading, setErrorWithDebounce]);
 
+  // Load patients when component mounts
   useEffect(() => {
     isMounted.current = true;
     fetchData();
     return () => {
       isMounted.current = false;
     };
-  }, []); // Empty dependency array
+  }, []);
 
+  // Snackbar close handler
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
 
+  // Modal handlers
   const handleModalOpen = () => {
     setModalOpen(true);
   };
@@ -102,67 +109,7 @@ const Patient = () => {
     setEditingPatient(null);
   };
 
-  const handleDeleteClick = (patientId) => {
-    setPatientToDelete(patientId);
-    setDeleteModalOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (patientToDelete) {
-      try {
-        const token = localStorage.getItem("token");
-        await axios.delete(`http://localhost:8080/patient/${patientToDelete}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            withCredentials: true,
-          },
-        });
-        await fetchData();
-        handleSuccessMessage(
-          "Patient and associated appointments deleted successfully"
-        );
-      } catch (error) {
-        console.error("Error deleting patient", error);
-        setErrorWithDebounce("Error deleting patient");
-      }
-    }
-    setDeleteModalOpen(false);
-    setPatientToDelete(null);
-  };
-
-  const handleDeleteCancel = () => {
-    setDeleteModalOpen(false);
-    setPatientToDelete(null);
-  };
-
-  const handleEditPatient = (patient) => {
-    setEditingPatient({ ...patient, originalId: patient.patientId });
-    setModalOpen(true);
-  };
-
-  const handleUpdatePatient = async (updatedPatient) => {
-    try {
-      const token = localStorage.getItem("token");
-      const originalId = editingPatient.originalId;
-      await axios.put(
-        `http://localhost:8080/patient/${originalId}`,
-        updatedPatient,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            withCredentials: true,
-          },
-        }
-      );
-      await fetchData();
-      setEditingPatient(null);
-      handleSuccessMessage("Patient updated successfully");
-    } catch (error) {
-      console.error("Error updating patient", error);
-      setErrorWithDebounce("Error updating patient");
-    }
-  };
-
+  // Create Handler
   const handleCreatePatient = async (newPatient) => {
     try {
       const currentPatients = await fetchData();
@@ -197,6 +144,70 @@ const Patient = () => {
     }
   };
 
+  // Update handlers
+  const handleEditPatient = (patient) => {
+    setEditingPatient({ ...patient, originalId: patient.patientId });
+    setModalOpen(true);
+  };
+
+  const handleUpdatePatient = async (updatedPatient) => {
+    try {
+      const token = localStorage.getItem("token");
+      const originalId = editingPatient.originalId;
+      await axios.put(
+        `http://localhost:8080/patient/${originalId}`,
+        updatedPatient,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            withCredentials: true,
+          },
+        }
+      );
+      await fetchData();
+      setEditingPatient(null);
+      handleSuccessMessage("Patient updated successfully");
+    } catch (error) {
+      console.error("Error updating patient", error);
+      setErrorWithDebounce("Error updating patient");
+    }
+  };
+
+  // Delete handlers
+  const handleDeleteClick = (patientId) => {
+    setPatientToDelete(patientId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (patientToDelete) {
+      try {
+        const token = localStorage.getItem("token");
+        await axios.delete(`http://localhost:8080/patient/${patientToDelete}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            withCredentials: true,
+          },
+        });
+        await fetchData();
+        handleSuccessMessage(
+          "Patient and associated appointments deleted successfully"
+        );
+      } catch (error) {
+        console.error("Error deleting patient", error);
+        setErrorWithDebounce("Error deleting patient");
+      }
+    }
+    setDeleteModalOpen(false);
+    setPatientToDelete(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setPatientToDelete(null);
+  };
+
+  // Initial form data and fields for form modal
   const initialFormData = {
     patientId: "",
     firstName: "",

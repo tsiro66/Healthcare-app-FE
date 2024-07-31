@@ -1,5 +1,6 @@
 import axios from "axios";
 
+// Function to check if token is valid
 export const checkTokenValidity = async (token) => {
   try {
     const response = await axios.get("http://localhost:8080/validate-token", {
