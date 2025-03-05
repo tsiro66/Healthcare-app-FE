@@ -1,7 +1,5 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import "./index.css";
 import {
   createTheme,
   ThemeProvider,
@@ -9,7 +7,7 @@ import {
   GlobalStyles,
 } from "@mui/material";
 import Patients from "./Patients/Patients.jsx";
-import Appointments from "./Appointments.jsx";
+import Appointments from "./Appointments/Appointments.jsx";
 import NotFoundPage from "./NotFoundPage.jsx";
 import "@fontsource/roboto";
 import Layout from "./Layout.jsx";
@@ -92,13 +90,11 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <AuthProvider>
-      <ThemeProvider theme={theme}>
-        {globalStyles}
-        <CssBaseline />
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </AuthProvider>
-  </StrictMode>
+  <AuthProvider>
+    <ThemeProvider theme={theme}>
+      {globalStyles}
+      <CssBaseline />
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  </AuthProvider>
 );

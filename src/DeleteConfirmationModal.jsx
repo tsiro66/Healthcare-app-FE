@@ -10,7 +10,7 @@ const DeleteConfirmation = ({ isOpen, closeModal, onDelete }) => {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: 400,
+          width: 300,
           bgcolor: "background.paper",
           borderRadius: 2,
           boxShadow: 24,
@@ -19,13 +19,12 @@ const DeleteConfirmation = ({ isOpen, closeModal, onDelete }) => {
       >
         <Typography>Are you sure you want to permanently delete?</Typography>
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-          <Button
-            onClick={onDelete}
-            sx={{ backgroundColor: "#ED4337", color: "white" }}
-          >
+          <Button onClick={onDelete} variant="contained" color="error">
             Delete
           </Button>
-          <Button onClick={closeModal}>Cancel</Button>
+          <Button onClick={closeModal} variant="contained" color="primary">
+            Cancel
+          </Button>
         </Box>
       </Box>
     </Modal>

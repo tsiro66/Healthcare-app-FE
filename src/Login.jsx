@@ -7,6 +7,7 @@ import AuthContext from "./Auth/AuthContext";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -23,7 +24,7 @@ const Login = () => {
           },
         }
       );
-      login(response.data.token);
+      login(response.data);
       setUsername("");
       setPassword("");
       navigate("/patients");

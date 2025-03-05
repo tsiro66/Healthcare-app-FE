@@ -13,7 +13,6 @@ const Navbar = () => {
       sx={{
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
         padding: "10px",
         marginLeft: "35px",
       }}
@@ -22,7 +21,6 @@ const Navbar = () => {
         sx={{
           display: "flex",
           justifyContent: "center",
-          alignItems: "center",
           flexWrap: "wrap",
           width: "320px",
           border: 2,
@@ -75,7 +73,7 @@ const Navbar = () => {
           navigate("/login");
         }}
         sx={{
-          marginLeft: "10px", // Space between the logout icon and the container
+          marginLeft: "10px",
           textDecoration: "none",
           display: "flex",
           alignItems: "center",

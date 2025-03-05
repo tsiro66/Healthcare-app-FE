@@ -36,7 +36,6 @@ const PatientModal = ({
   }, [patient, reset]);
 
   const onSubmit = async (data) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     if (patient) {
       handleEditPatients({ ...patient, ...data });
     } else {
@@ -62,7 +61,7 @@ const PatientModal = ({
         }}
       >
         <Box>
-          <Typography variant="h6" component="h2">
+          <Typography variant="h6">
             {patient ? `Edit patient ${patient.firstName}` : "Add a patient"}
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -103,11 +102,12 @@ const PatientModal = ({
                 placeholder="Gender"
               />
               <TextField
+                slotProps={{ inputLabel: { shrink: true } }}
                 {...register("dob", {
                   required: "Date of birth is required",
                 })}
                 type="date"
-                placeholder="Date of Birth"
+                label="Date of Birth"
               />
               {errors.dob && (
                 <Box sx={{ color: "#f44336" }}>{errors.dob.message}</Box>
@@ -116,14 +116,21 @@ const PatientModal = ({
             <Box
               sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
             >
-              <Button disabled={isSubmitting} type="submit">
+              <Button
+                disabled={isSubmitting}
+                type="submit"
+                variant="contained"
+                color="primary"
+              >
                 {isSubmitting
                   ? "Loading..."
                   : patient
                   ? "Edit Patient"
                   : "Add Patient"}
               </Button>
-              <Button onClick={closeModal}>Close</Button>
+              <Button onClick={closeModal} variant="contained" color="error">
+                Close
+              </Button>
             </Box>
           </form>
         </Box>

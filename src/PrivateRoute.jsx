@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import AuthContext from "./Auth/AuthContext";
 import api from "./api";
 import PropTypes from "prop-types";
+import { Box, CircularProgress } from "@mui/material";
 
 const PrivateRoute = ({ children }) => {
   const { token } = useContext(AuthContext);
@@ -32,8 +33,12 @@ const PrivateRoute = ({ children }) => {
     validateToken();
   }, [token]);
 
-  // Add a loading spinner
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", my: "30%" }}>
+        <CircularProgress />
+      </Box>
+    );
 
   return isValid ? children : <Navigate to="/login" />;
 };

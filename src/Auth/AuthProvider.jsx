@@ -6,13 +6,12 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
 
   const login = (newToken) => {
-    localStorage.setItem("token", newToken); // Store token
+    localStorage.setItem("token", newToken); // Local storage persists through reload. If this is not here the token would be lost after reload
     setToken(newToken);
-    // window.location.href = "/login";
   };
 
   const logout = () => {
-    localStorage.removeItem("token"); // Clear token
+    localStorage.removeItem("token");
     setToken(null);
   };
 

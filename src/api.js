@@ -5,4 +5,15 @@ const instance = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+instance.interceptors.request.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+  }
+);
 export default instance;

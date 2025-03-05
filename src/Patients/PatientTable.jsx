@@ -7,7 +7,9 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TableHead,
+  TablePagination,
   TableRow,
   Typography,
 } from "@mui/material";
@@ -17,7 +19,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import PropTypes from "prop-types";
 import { useState } from "react";
 import PatientModal from "./PatientModal";
-import Searchbar from "./Searchbar";
+import SearchIcon from "@mui/icons-material/Search";
+import { TextField } from "@mui/material";
 import DeleteConfirmationModal from "../DeleteConfirmationModal";
 
 const PatientTable = ({
@@ -25,22 +28,29 @@ const PatientTable = ({
   handleAddPatients,
   handleDeletePatients,
   handleEditPatients,
+  pageNo,
+  pageSize,
+  setPageNo,
+  setPageSize,
+  totalPatients,
 }) => {
   const [selectedPatients, setSelectedPatients] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [patientToEdit, setPatientToEdit] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   //Open/close modal functions
   const openEditModal = () => {
     const patient = patients.find((p) => p.patientId === selectedPatients[0]);
     setPatientToEdit(patient || null);
-    setIsModalOpen(true);
+    setIsPatientModalOpen(true);
+    setSelectedPatients([]);
   };
 
   const openAddModal = () => {
     setPatientToEdit(null);
-    setIsModalOpen(true);
+    setIsPatientModalOpen(true);
   };
 
   const openConfirmlModal = () => {
@@ -51,11 +61,12 @@ const PatientTable = ({
     setIsConfirmModalOpen(false);
   };
 
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => setIsPatientModalOpen(false);
 
   //Functions for changing checkbox state
   const isAllSelected =
     patients.length > 0 && selectedPatients.length === patients.length;
+
   const isIndeterminate = selectedPatients.length > 0 && !isAllSelected;
 
   const handleSelectAllChange = () => {
@@ -70,6 +81,7 @@ const PatientTable = ({
     setSelectedPatients((prevSelected) => {
       const isSelected = prevSelected.includes(patientId);
       if (isSelected) {
+        console.log(prevSelected.filter((id) => id !== patientId));
         return prevSelected.filter((id) => id !== patientId);
       } else {
         return [...prevSelected, patientId];
@@ -86,16 +98,36 @@ const PatientTable = ({
     setIsConfirmModalOpen(false);
   };
 
+  //Pagination functions
+  const handleChangePage = (event, newPage) => {
+    setPageNo(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    console.log(event.target.value);
+    setPageSize(parseInt(event.target.value, 10));
+    setPageNo(0);
+  };
+
   return (
     <TableContainer
-      sx={{ maxWidth: "70%", margin: "auto", mt: 5 }}
+      sx={{ maxWidth: "70%", margin: "auto", my: 5 }}
       component={Paper}
     >
       <Box sx={{ display: "flex", justifyContent: "space-between", margin: 3 }}>
         <Typography variant="h2">
           <b>My patients</b>
         </Typography>
-        <Searchbar />
+        {/* Searchbar */}
+        <Box>
+          <SearchIcon sx={{ m: 1 }} />
+          <TextField
+            size="small"
+            variant="outlined"
+            label="Search"
+            onChange={(e) => setSearch(e.target.value)}
+          ></TextField>
+        </Box>
       </Box>
       <Table aria-label="simple table">
         <TableHead>
@@ -115,50 +147,39 @@ const PatientTable = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {patients.map((patient) => (
-            <TableRow
-              key={patient.patientId}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-            >
-              <TableCell>
-                <Checkbox
-                  checked={selectedPatients.includes(patient.patientId)}
-                  onChange={() => handleCheckboxChange(patient.patientId)}
-                />
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {patient.patientId}
-              </TableCell>
+          {patients
+            .filter((patient) => {
+              //Searchbar function
+              return (
+                patient.firstName
+                  .toLowerCase()
+                  .includes(search.toLowerCase()) ||
+                patient.lastName.toLowerCase().includes(search.toLowerCase()) ||
+                patient.gender.toLowerCase().includes(search.toLowerCase()) ||
+                patient.patientId.toString().includes(search)
+              );
+            })
+            .map((patient) => (
+              <TableRow key={patient.patientId}>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedPatients.includes(patient.patientId)}
+                    onChange={() => handleCheckboxChange(patient.patientId)}
+                  />
+                </TableCell>
+                <TableCell component="th" scope="row">
+                  {patient.patientId}
+                </TableCell>
 
-              <TableCell align="right">{patient.firstName}</TableCell>
-              <TableCell align="right">{patient.lastName}</TableCell>
-              <TableCell align="right">{patient.gender}</TableCell>
-              <TableCell align="right">{patient.dob}</TableCell>
-            </TableRow>
-          ))}
+                <TableCell align="right">{patient.firstName}</TableCell>
+                <TableCell align="right">{patient.lastName}</TableCell>
+                <TableCell align="right">{patient.gender}</TableCell>
+                <TableCell align="right">{patient.dob}</TableCell>
+              </TableRow>
+            ))}
           <TableRow>
-            <TableCell colSpan={5}></TableCell>
-
-            <TableCell align="right">
-              <IconButton onClick={openAddModal}>
-                <AddCircleIcon />
-              </IconButton>
-              <IconButton
-                onClick={openConfirmlModal}
-                disabled={selectedPatients.length == 0}
-              >
-                <DeleteIcon />
-              </IconButton>
-
-              <IconButton
-                onClick={openEditModal}
-                disabled={selectedPatients.length !== 1}
-              >
-                <EditIcon />
-              </IconButton>
-            </TableCell>
             <PatientModal
-              isOpen={isModalOpen}
+              isOpen={isPatientModalOpen}
               closeModal={closeModal}
               handleAddPatients={handleAddPatients}
               handleEditPatients={handleEditPatients}
@@ -171,6 +192,35 @@ const PatientTable = ({
             />
           </TableRow>
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell>
+              <IconButton onClick={openAddModal}>
+                <AddCircleIcon />
+              </IconButton>
+              <IconButton
+                onClick={openConfirmlModal}
+                disabled={selectedPatients.length == 0}
+              >
+                <DeleteIcon />
+              </IconButton>
+              <IconButton
+                onClick={openEditModal}
+                disabled={selectedPatients.length !== 1}
+              >
+                <EditIcon />
+              </IconButton>
+            </TableCell>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPage={pageSize}
+              count={totalPatients}
+              page={pageNo}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </TableRow>
+        </TableFooter>
       </Table>
     </TableContainer>
   );
@@ -181,6 +231,11 @@ PatientTable.propTypes = {
   handleAddPatients: PropTypes.func.isRequired,
   handleDeletePatients: PropTypes.func.isRequired,
   handleEditPatients: PropTypes.func.isRequired,
+  pageNo: PropTypes.number.isRequired,
+  pageSize: PropTypes.number.isRequired,
+  setPageNo: PropTypes.func.isRequired,
+  setPageSize: PropTypes.func.isRequired,
+  totalPatients: PropTypes.number.isRequired,
 };
 
 export default PatientTable;
