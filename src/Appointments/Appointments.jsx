@@ -151,7 +151,7 @@ const Appointments = () => {
           <DateCalendar
             value={selectedDate || null}
             onChange={(date) => {
-              if (selectedDate && date && date.isSame(selectedDate)) {
+              if (selectedDate && date.isSame(selectedDate)) {
                 setSelectedDate(null);
               } else {
                 setSelectedDate(date);

@@ -12,6 +12,7 @@ import {
   TablePagination,
   TableRow,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -22,6 +23,7 @@ import PatientModal from "./PatientModal";
 import SearchIcon from "@mui/icons-material/Search";
 import { TextField } from "@mui/material";
 import DeleteConfirmationModal from "../DeleteConfirmationModal";
+import { useTheme } from "@emotion/react";
 
 const PatientTable = ({
   patients,
@@ -34,6 +36,8 @@ const PatientTable = ({
   setPageSize,
   totalPatients,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [selectedPatients, setSelectedPatients] = useState([]);
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [patientToEdit, setPatientToEdit] = useState(null);
@@ -81,7 +85,6 @@ const PatientTable = ({
     setSelectedPatients((prevSelected) => {
       const isSelected = prevSelected.includes(patientId);
       if (isSelected) {
-        console.log(prevSelected.filter((id) => id !== patientId));
         return prevSelected.filter((id) => id !== patientId);
       } else {
         return [...prevSelected, patientId];
@@ -111,7 +114,7 @@ const PatientTable = ({
 
   return (
     <TableContainer
-      sx={{ maxWidth: "70%", margin: "auto", my: 5 }}
+      sx={{ width: isMobile ? "100%" : "70%", margin: "auto", my: 5 }}
       component={Paper}
     >
       <Box sx={{ display: "flex", justifyContent: "space-between", margin: 3 }}>
