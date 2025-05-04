@@ -1,4 +1,4 @@
-# Frontend - Master Detail Project
+# Frontend - Healthcare Project
 
 ## Overview
 
